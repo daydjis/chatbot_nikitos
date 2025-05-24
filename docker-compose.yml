@@ -1,0 +1,41 @@
+version: "3.9"
+
+services:
+  ollama:
+    image: ollama/ollama
+    container_name: ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_models:/root/.ollama
+      - ./Modelfile:/Modelfile
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s http://localhost:11434 | grep -q 'Ollama is running'"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  model-init:
+    image: ollama/ollama
+    container_name: model-init
+    volumes:
+      - ollama_models:/root/.ollama
+      - ./Modelfile:/Modelfile
+    command: create nikitos -f /Modelfile
+    network_mode: service:ollama
+  bot:
+    build:
+      context: .
+    container_name: bot
+    working_dir: /app
+    depends_on:
+      model-init:
+        condition: service_completed_successfully
+    environment:
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+    restart: unless-stopped
+    command: ./nikitos-bot
+
+volumes:
+  ollama_models:

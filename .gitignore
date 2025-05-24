@@ -1,0 +1,19 @@
+# Golang
+/bin/
+/build/
+/vendor/
+*.exe
+*.test
+*.out
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Env
+.env
+*.env
+
+# Docker volumes
+ollama_models/
